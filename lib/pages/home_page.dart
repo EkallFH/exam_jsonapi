@@ -25,6 +25,86 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void addAlbum(
+      int albumId, String title, String url, String thumbnailUrl) async {
+    Album newAlbum = Album(
+      albumId: albumId,
+      id: lastAlbum.isNotEmpty ? lastAlbum.last.id + 1 : 1,
+      title: title,
+      url: url,
+      thumbnailUrl: thumbnailUrl,
+    );
+
+    try {
+      await AlbumService.addAlbum(newAlbum);
+      setState(() {
+        lastAlbum.add(newAlbum);
+      });
+    } catch (e) {
+      // Handle error
+    }
+  }
+
+  void showAddDialog(BuildContext context) {
+    TextEditingController albumIdController = TextEditingController();
+    TextEditingController titleController = TextEditingController();
+    TextEditingController urlController = TextEditingController();
+    TextEditingController thumbnailUrlController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Tambah Album'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: albumIdController,
+                decoration: const InputDecoration(labelText: 'Album ID'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Judul'),
+              ),
+              TextField(
+                controller: urlController,
+                decoration: const InputDecoration(labelText: 'URL'),
+              ),
+              TextField(
+                controller: thumbnailUrlController,
+                decoration: const InputDecoration(labelText: 'Thumbnail URL'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text('Batal'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              child: const Text('Tambah'),
+              onPressed: () {
+                addAlbum(
+                  int.parse(albumIdController.text),
+                  titleController.text,
+                  urlController.text,
+                  thumbnailUrlController.text,
+                );
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void deleteAlbum(int id) async {
     try {
       await AlbumService.deleteAlbum(id);
@@ -81,7 +161,7 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const Text('Batal'),
             ),
             TextButton(
               onPressed: () {
@@ -95,7 +175,7 @@ class _HomePageState extends State<HomePage> {
                 updateAlbum(updatedAlbum);
                 Navigator.pop(context);
               },
-              child: const Text('Save'),
+              child: const Text('Simpan'),
             ),
           ],
         );
@@ -131,7 +211,6 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.all(10),
                   child: Card(
                     child: ListTile(
-                      
                       leading: CircleAvatar(
                         backgroundImage: NetworkImage(album.thumbnailUrl),
                       ),
@@ -157,6 +236,14 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.yellow,
+        onPressed: () {
+          showAddDialog(context);
+        },
+        child: const Icon(Icons.add),
+      ),
+      
     );
   }
 }

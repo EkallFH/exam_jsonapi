@@ -4,11 +4,11 @@ import 'package:exam_jsonapi/models/album.dart';
 import 'package:http/http.dart' as http;
 
 class AlbumService {
-  static const String baseUrl = 'https://jsonplaceholder.typicode.com/photos';
+  static const String baseUrl = 'https://jsonplaceholder.typicode.com/albums';
 
   static Future<List<Album>> fetchAlbum() async {
     try {
-      final response = await http.get(Uri.parse(baseUrl));
+      final response = await http.get(Uri.parse('$baseUrl/1/photos'));
       if (response.statusCode == 200) {
         final List<dynamic> result = jsonDecode(response.body);
         List<Album> lastAlbum =
@@ -39,4 +39,26 @@ class AlbumService {
       throw Exception('Gagal Untuk Mengedit Album');
     }
   }
+
+    static Future<void> addAlbum(Album album) async {
+    try {
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'albumId': album.albumId,
+          'title': album.title,
+          'url': album.url,
+          'thumbnailUrl': album.thumbnailUrl,
+        }),
+      );
+
+      if (response.statusCode != 201) {
+        throw Exception('Gagal Menambah Album');
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
 }
